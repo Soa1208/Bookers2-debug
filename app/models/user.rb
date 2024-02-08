@@ -18,7 +18,7 @@ class User < ApplicationRecord
     (profile_image.attached?) ? profile_image : 'no_image.jpg'
   end
   
-  # ーーーーーフォロー関連ーーーーーー
+  # ーーーーーフォロー関連ーーーーー
   has_many :active_relationships, class_name: "Relationship", foreign_key: "follower_id", dependent: :destroy
   has_many :passive_relationships, class_name: "Relationship", foreign_key: "followed_id", dependent: :destroy
   has_many :followings, through: :active_relationships, source: :followed
@@ -34,5 +34,18 @@ class User < ApplicationRecord
 
   def following?(user)
     followings.include?(user)
+  end
+  
+  # ーーーーー検索関連ーーーーー
+  def self.search_for(content, method)
+    if method == 'perfect'
+      User.where(name: content)
+    elsif method == 'forward'
+      User.where('name LIKE ?', content + '%')
+    elsif method == 'backward'
+      User.where('name LIKE ?', '%' + content)
+    else
+      User.where('name LIKE ?', '%' + content + '%')
+    end
   end
 end
